@@ -1,0 +1,86 @@
+{
+  "name": "@stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked",
+  "version": "0.0.0",
+  "description": "Return a kernel for applying a one-dimensional strided array function to an input ndarray and assigning results to an output ndarray.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "The Stdlib Authors",
+    "url": "https://github.com/stdlib-js/stdlib/graphs/contributors"
+  },
+  "contributors": [
+    {
+      "name": "The Stdlib Authors",
+      "url": "https://github.com/stdlib-js/stdlib/graphs/contributors"
+    }
+  ],
+  "main": "./lib",
+  "directories": {
+    "doc": "./docs",
+    "example": "./examples",
+    "lib": "./lib",
+    "test": "./test"
+  },
+  "types": "./docs/types",
+  "scripts": {
+    "test": "make test",
+    "test-cov": "make test-cov",
+    "examples": "make examples"
+  },
+  "homepage": "https://stdlib.io",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-unblocked.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stdlib-js/stdlib/issues"
+  },
+  "dependencies": {
+    "@stdlib/array-base-copy-indexed": "^0.2.3",
+    "@stdlib/ndarray-base-assert-is-row-major": "^0.2.3",
+    "@stdlib/ndarray-base-kernels-utils-increment-offsets": "github:stdlib-js/ndarray-base-kernels-utils-increment-offsets#main",
+    "@stdlib/ndarray-base-offsets": "github:stdlib-js/ndarray-base-offsets#main",
+    "@stdlib/ndarray-base-set-descriptor-offsets": "github:stdlib-js/ndarray-base-set-descriptor-offsets#main"
+  },
+  "devDependencies": {
+    "@stdlib/array-float64": "^0.2.3",
+    "@stdlib/blas-ext-base-ndarray-gcusum": "^0.1.1",
+    "@stdlib/ndarray-base-kernels-generic-unary-strided1d-strategy": "github:stdlib-js/ndarray-base-kernels-generic-unary-strided1d-strategy#main",
+    "@stdlib/ndarray-base-to-array": "^0.2.2",
+    "tape": "git+https://github.com/kgryte/tape.git#fix/globby",
+    "istanbul": "^0.4.1",
+    "tap-min": "git+https://github.com/Planeshifter/tap-min.git"
+  },
+  "engines": {
+    "node": ">=0.10.0",
+    "npm": ">2.7.0"
+  },
+  "os": [
+    "aix",
+    "darwin",
+    "freebsd",
+    "linux",
+    "macos",
+    "openbsd",
+    "sunos",
+    "win32",
+    "windows"
+  ],
+  "keywords": [
+    "stdlib",
+    "base",
+    "strided",
+    "array",
+    "ndarray",
+    "unary",
+    "apply",
+    "cumulative",
+    "accumulate",
+    "accumulation",
+    "vector",
+    "kernel"
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/stdlib"
+  }
+}
