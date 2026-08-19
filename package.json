@@ -39,7 +39,8 @@
     "@stdlib/ndarray-base-assert-is-row-major": "^0.2.3",
     "@stdlib/ndarray-base-kernels-utils-increment-offsets": "github:stdlib-js/ndarray-base-kernels-utils-increment-offsets#main",
     "@stdlib/ndarray-base-offsets": "github:stdlib-js/ndarray-base-offsets#main",
-    "@stdlib/ndarray-base-set-descriptor-offsets": "github:stdlib-js/ndarray-base-set-descriptor-offsets#main"
+    "@stdlib/ndarray-base-set-descriptor-offsets": "github:stdlib-js/ndarray-base-set-descriptor-offsets#main",
+    "@stdlib/error-tools-fmtprodmsg": "^0.2.3"
   },
   "devDependencies": {
     "@stdlib/array-float64": "^0.2.3",
