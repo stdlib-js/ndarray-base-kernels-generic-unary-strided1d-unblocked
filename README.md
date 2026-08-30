@@ -29,7 +29,7 @@ limitations under the License.
   <p>To join us in bringing numerical computing to the web, get started by checking us out on <a href="https://github.com/stdlib-js/stdlib">GitHub</a>, and please consider <a href="https://opencollective.com/stdlib">financially supporting stdlib</a>. We greatly appreciate your continued support!</p>
 </details>
 
-# resolveKernel
+# kernel
 
 [![NPM version][npm-image]][npm-url] [![Build Status][test-image]][test-url] [![Coverage Status][coverage-image]][coverage-url] <!-- [![dependencies][dependencies-image]][dependencies-url] -->
 
@@ -41,26 +41,44 @@ limitations under the License.
 
 <!-- /.intro -->
 
+<section class="installation">
 
+## Installation
+
+```bash
+npm install @stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked
+```
+
+Alternatively,
+
+-   To load the package in a website via a `script` tag without installation and bundlers, use the [ES Module][es-module] available on the [`esm`][esm-url] branch (see [README][esm-readme]).
+-   If you are using Deno, visit the [`deno`][deno-url] branch (see [README][deno-readme] for usage intructions).
+-   For use in Observable, or in browser/node environments, use the [Universal Module Definition (UMD)][umd] build available on the [`umd`][umd-url] branch (see [README][umd-readme]).
+
+The [branches.md][branches-url] file summarizes the available branches and displays a diagram illustrating their relationships.
+
+To view installation and usage instructions specific to each branch build, be sure to explicitly navigate to the respective README files on each branch, as linked to above.
+
+</section>
 
 <section class="usage">
 
 ## Usage
 
 ```javascript
-import resolveKernel from 'https://cdn.jsdelivr.net/gh/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-unblocked@esm/index.mjs';
+var kernel = require( '@stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked' );
 ```
 
-#### resolveKernel( ndims )
+#### kernel( ndims )
 
 Returns a kernel for applying a one-dimensional strided array function to an input ndarray and assigning results to an output ndarray.
 
 <!-- eslint-disable max-len -->
 
 ```javascript
-import Float64Array from 'https://cdn.jsdelivr.net/gh/stdlib-js/array-float64@esm/index.mjs';
-import ndarray2array from 'https://cdn.jsdelivr.net/gh/stdlib-js/ndarray-base-to-array@esm/index.mjs';
-import gcusum from 'https://cdn.jsdelivr.net/gh/stdlib-js/blas-ext-base-ndarray-gcusum@esm/index.mjs';
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
 
 // Create data buffers:
 var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
@@ -159,10 +177,10 @@ var strategy = {
 };
 
 // Resolve a kernel:
-var kernel = resolveKernel( 2 );
+var f = kernel( 2 );
 
 // Apply strided function:
-kernel( gcusum, [ x, y, initial ], views, [ 1, 3 ], [ 12, 4 ], [ 12, 4 ], strategy, strategy, {} );
+f( gcusum, [ x, y, initial ], views, [ 1, 3 ], [ 12, 4 ], [ 12, 4 ], strategy, strategy, {} );
 
 var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
 // returns [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ]
@@ -175,9 +193,1427 @@ The function accepts the following arguments:
 If the function is provided an `ndims` value greater than the maximum number of supported loop dimensions, the function returns `null`.
 
 ```javascript
-var f = resolveKernel( 100000 );
+var f = kernel( 100000 );
 // returns null
 ```
+
+The returned function accepts the following arguments:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+The returned function iterates over ndarray elements according to the memory layout of the input ndarray.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel0d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 2, 2 ];
+var ysh = [ 2, 2 ];
+
+// Define the array strides:
+var sx = [ 2, 1 ];
+var sy = [ 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 3 ],
+    'strides': [ 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel0d( gcusum, [ x, y, initial ], [], [], [], [], strategy, strategy, {} );
+
+var v = y.data;
+// returns <Float64Array>[ 1.0, 3.0, 6.0, 10.0 ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have zero elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+The `views`, `shape`, `stridesX`, and `stridesY` parameters are unused. Providing empty arrays for these parameters is recommended in order to ensure a monomorphic API.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel1d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 3, 2, 2 ];
+var ysh = [ 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 4, 2, 1 ];
+var sy = [ 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 3 ],
+    'strides': [ 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel1d( gcusum, [ x, y, initial ], views, [ 3 ], [ 4 ], [ 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have one element.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel2d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 3, 2, 2 ];
+var ysh = [ 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 4, 2, 1 ];
+var sy = [ 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 3 ],
+    'strides': [ 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel2d( gcusum, [ x, y, initial ], views, [ 1, 3 ], [ 12, 4 ], [ 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have two elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel3d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 3 ],
+    'strides': [ 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel3d( gcusum, [ x, y, initial ], views, [ 1, 1, 3 ], [ 12, 12, 4 ], [ 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have three elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel4d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel4d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 3 ], [ 12, 12, 12, 4 ], [ 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have four elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel5d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel5d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have five elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel6d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel6d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have six elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel7d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel7d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have seven elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel8d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel8d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have eight elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel9d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel9d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have nine elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
+
+<!-- lint disable maximum-heading-length -->
+
+#### kernel.kernel10d( fcn, arrays, views, shape, stridesX, strideY, strategyX, strategyY, options )
+
+<!-- lint enable maximum-heading-length -->
+
+Applies a one-dimensional strided array function to a list of specified dimensions in an input ndarray and assigns results to a provided output ndarray.
+
+<!-- eslint-disable max-len -->
+
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+
+// Create data buffers:
+var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
+var ybuf = new Float64Array( [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ] );
+
+// Define the array shapes:
+var xsh = [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+var ysh = [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2 ];
+
+// Define the array strides:
+var sx = [ 12, 12, 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+var sy = [ 12, 12, 12, 12, 12, 12, 12, 12, 12, 4, 2, 1 ];
+
+// Define the index offsets:
+var ox = 0;
+var oy = 0;
+
+// Create an input ndarray descriptor:
+var x = {
+    'dtype': 'float64',
+    'data': xbuf,
+    'shape': xsh,
+    'strides': sx,
+    'offset': ox,
+    'order': 'row-major'
+};
+
+// Create an ndarray descriptor for the initial sum:
+var initial = {
+    'dtype': 'float64',
+    'data': new Float64Array( [ 0.0 ] ),
+    'shape': [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+    'strides': [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+    'offset': 0,
+    'order': 'row-major'
+};
+
+// Create an output ndarray descriptor:
+var y = {
+    'dtype': 'float64',
+    'data': ybuf,
+    'shape': ysh,
+    'strides': sy,
+    'offset': oy,
+    'order': 'row-major'
+};
+
+// Initialize ndarray descriptors representing subarray views:
+var views = [
+    {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': x.offset,
+        'order': x.order
+    },
+    {
+        'dtype': y.dtype,
+        'data': y.data,
+        'shape': [ 2, 2 ],
+        'strides': [ 2, 1 ],
+        'offset': y.offset,
+        'order': y.order
+    },
+    {
+        'dtype': initial.dtype,
+        'data': initial.data,
+        'shape': [],
+        'strides': [ 0 ],
+        'offset': initial.offset,
+        'order': initial.order
+    }
+];
+
+// Define an input strategy:
+function inputStrategy( x ) {
+    return {
+        'dtype': x.dtype,
+        'data': x.data,
+        'shape': [ 4 ],
+        'strides': [ 1 ],
+        'offset': x.offset,
+        'order': x.order
+    };
+}
+
+// Define an output strategy:
+function outputStrategy( x ) {
+    return x;
+}
+
+var strategy = {
+    'input': inputStrategy,
+    'output': outputStrategy
+};
+
+// Apply strided function:
+kernel.kernel10d( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 12, 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 12, 12, 12, 12, 12, 4 ], strategy, strategy, {} );
+
+var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
+// returns [ [ [ [ [ [ [ [ [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ] ] ] ] ] ] ] ] ]
+```
+
+The function has the following parameters:
+
+-   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
+-   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
+-   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
+-   **shape**: loop dimensions. Should have ten elements.
+-   **stridesX**: loop dimension strides for the input ndarray.
+-   **stridesY**: loop dimension strides for the output ndarray.
+-   **strategyX**: strategy for marshaling data to and from an input ndarray view.
+-   **strategyY**: strategy for marshaling data to and from an output ndarray view.
+-   **options**: function options which are passed through to `fcn`.
 
 </section>
 
@@ -186,18 +1622,6 @@ var f = resolveKernel( 100000 );
 <section class="notes">
 
 ## Notes
-
--   The returned function accepts the following arguments:
-
-    -   **fcn**: function which will be applied to a one-dimensional input subarray and should update a one-dimensional output subarray with results.
-    -   **arrays**: array containing one input ndarray [descriptor][@stdlib/ndarray/base/descriptor] and one output ndarray [descriptor][@stdlib/ndarray/base/descriptor], followed by any additional ndarray arguments.
-    -   **views**: initialized ndarray [descriptors][@stdlib/ndarray/base/descriptor] representing subarray views.
-    -   **shape**: loop dimensions.
-    -   **stridesX**: loop dimension strides for the input ndarray.
-    -   **stridesY**: loop dimension strides for the output ndarray.
-    -   **strategyX**: strategy for marshaling data to and from an input ndarray view.
-    -   **strategyY**: strategy for marshaling data to and from an output ndarray view.
-    -   **options**: function options which are passed through to `fcn`.
 
 -   The strided array function is expected to have the following signature:
 
@@ -209,8 +1633,6 @@ var f = resolveKernel( 100000 );
 
     -   **arrays**: array containing a one-dimensional subarray of the input ndarray, a one-dimensional subarray of the output ndarray, and any additional ndarray arguments as subarrays.
     -   **options**: function options (_optional_).
-
--   The returned function iterates over ndarray elements according to the memory layout of the input ndarray.
 
 </section>
 
@@ -224,17 +1646,12 @@ var f = resolveKernel( 100000 );
 
 <!-- eslint no-undef: "error" -->
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<body>
-<script type="module">
-
-import Float64Array from 'https://cdn.jsdelivr.net/gh/stdlib-js/array-float64@esm/index.mjs';
-import ndarray2array from 'https://cdn.jsdelivr.net/gh/stdlib-js/ndarray-base-to-array@esm/index.mjs';
-import gcusum from 'https://cdn.jsdelivr.net/gh/stdlib-js/blas-ext-base-ndarray-gcusum@esm/index.mjs';
-import strategy from 'https://cdn.jsdelivr.net/gh/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-strategy@esm/index.mjs';
-import resolveKernel from 'https://cdn.jsdelivr.net/gh/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-unblocked@esm/index.mjs';
+```javascript
+var Float64Array = require( '@stdlib/array-float64' );
+var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
+var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
+var strategy = require( '@stdlib/ndarray-base-kernels-generic-unary-strided1d-strategy' );
+var kernel = require( '@stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked' );
 
 // Create data buffers:
 var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
@@ -315,17 +1732,13 @@ var strategyX = strategy( views[ 0 ] );
 var strategyY = strategy( views[ 1 ] );
 
 // Resolve a kernel:
-var kernel = resolveKernel( 5 );
+var f = kernel( 5 );
 
 // Apply strided function:
-kernel( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 4 ], strategyX, strategyY, {} );
+f( gcusum, [ x, y, initial ], views, [ 1, 1, 1, 1, 3 ], [ 12, 12, 12, 12, 4 ], [ 12, 12, 12, 12, 4 ], strategyX, strategyY, {} );
 
 console.log( ndarray2array( x.data, x.shape, x.strides, x.offset, x.order ) );
 console.log( ndarray2array( y.data, y.shape, y.strides, y.offset, y.order ) );
-
-</script>
-</body>
-</html>
 ```
 
 </section>
@@ -347,7 +1760,7 @@ console.log( ndarray2array( y.data, y.shape, y.strides, y.offset, y.order ) );
 
 ## Notice
 
-This package is part of [stdlib][stdlib], a standard library with an emphasis on numerical and scientific computing. The library provides a collection of robust, high performance libraries for mathematics, statistics, streams, utilities, and more.
+This package is part of [stdlib][stdlib], a standard library for JavaScript and Node.js, with an emphasis on numerical and scientific computing. The library provides a collection of robust, high performance libraries for mathematics, statistics, streams, utilities, and more.
 
 For more information on the project, filing bug reports and feature requests, and guidance on how to develop [stdlib][stdlib], see the main project [repository][stdlib].
 
@@ -403,7 +1816,7 @@ Copyright &copy; 2016-2026. The Stdlib [Authors][stdlib-authors].
 [esm-readme]: https://github.com/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-unblocked/blob/esm/README.md
 [branches-url]: https://github.com/stdlib-js/ndarray-base-kernels-generic-unary-strided1d-unblocked/blob/main/branches.md
 
-[@stdlib/ndarray/base/descriptor]: https://github.com/stdlib-js/ndarray-base-descriptor/tree/esm
+[@stdlib/ndarray/base/descriptor]: https://github.com/stdlib-js/ndarray-base-descriptor
 
 </section>
 
