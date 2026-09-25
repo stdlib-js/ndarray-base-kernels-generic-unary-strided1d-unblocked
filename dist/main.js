@@ -1,17 +1,68 @@
-/** @license Apache-2.0 */
+/**
+* @license Apache-2.0
+*
+* Copyright (c) 2026 The Stdlib Authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 'use strict';
 
+// MODULES //
+
+var kernel0d = require( './0d.js' );
+var kernel1d = require( './1d.js' );
+var kernel2d = require( './2d.js' );
+var kernel3d = require( './3d.js' );
+var kernel4d = require( './4d.js' );
+var kernel5d = require( './5d.js' );
+var kernel6d = require( './6d.js' );
+var kernel7d = require( './7d.js' );
+var kernel8d = require( './8d.js' );
+var kernel9d = require( './9d.js' );
+var kernel10d = require( './10d.js' );
+
+
+// VARIABLES //
+
+var KERNELS = [
+	kernel0d,
+	kernel1d,
+	kernel2d,
+	kernel3d,
+	kernel4d,
+	kernel5d,
+	kernel6d,
+	kernel7d,
+	kernel8d,
+	kernel9d,
+	kernel10d
+];
+var MAX_DIMS = KERNELS.length - 1;
+
+
+// MAIN //
+
 /**
-* Return a kernel for applying a one-dimensional strided array function to an input ndarray and assigning results to an output ndarray.
+* Returns a kernel for applying a one-dimensional strided array function to an input ndarray and assigning results to an output ndarray.
 *
-* @module @stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked
+* @param {integer} ndims - number of loop dimensions
+* @returns {(Function|null)} kernel function or null
 *
 * @example
 * var Float64Array = require( '@stdlib/array-float64' );
 * var ndarray2array = require( '@stdlib/ndarray-base-to-array' );
 * var gcusum = require( '@stdlib/blas-ext-base-ndarray-gcusum' );
-* var kernel = require( '@stdlib/ndarray-base-kernels-generic-unary-strided1d-unblocked' );
 *
 * // Create data buffers:
 * var xbuf = new Float64Array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 ] );
@@ -118,39 +169,14 @@
 * var arr = ndarray2array( y.data, y.shape, y.strides, y.offset, y.order );
 * // returns [ [ [ [ 1.0, 3.0 ], [ 6.0, 10.0 ] ], [ [ 5.0, 11.0 ], [ 18.0, 26.0 ] ], [ [ 9.0, 19.0 ], [ 30.0, 42.0 ] ] ] ]
 */
-
-// MODULES //
-
-var setReadOnly = require( '@stdlib/utils-define-nonenumerable-read-only-property/dist' );
-var kernel0d = require( './0d.js' );
-var kernel1d = require( './1d.js' );
-var kernel2d = require( './2d.js' );
-var kernel3d = require( './3d.js' );
-var kernel4d = require( './4d.js' );
-var kernel5d = require( './5d.js' );
-var kernel6d = require( './6d.js' );
-var kernel7d = require( './7d.js' );
-var kernel8d = require( './8d.js' );
-var kernel9d = require( './9d.js' );
-var kernel10d = require( './10d.js' );
-var main = require( './main.js' );
-
-
-// MAIN //
-
-setReadOnly( main, 'kernel0d', kernel0d );
-setReadOnly( main, 'kernel1d', kernel1d );
-setReadOnly( main, 'kernel2d', kernel2d );
-setReadOnly( main, 'kernel3d', kernel3d );
-setReadOnly( main, 'kernel4d', kernel4d );
-setReadOnly( main, 'kernel5d', kernel5d );
-setReadOnly( main, 'kernel6d', kernel6d );
-setReadOnly( main, 'kernel7d', kernel7d );
-setReadOnly( main, 'kernel8d', kernel8d );
-setReadOnly( main, 'kernel9d', kernel9d );
-setReadOnly( main, 'kernel10d', kernel10d );
+function kernel( ndims ) {
+	if ( ndims < 0 || ndims > MAX_DIMS ) {
+		return null;
+	}
+	return KERNELS[ ndims ];
+}
 
 
 // EXPORTS //
 
-module.exports = main;
+module.exports = kernel;
